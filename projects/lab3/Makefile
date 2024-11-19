@@ -14,8 +14,8 @@ test: sim
 	python3 ./scripts/test.py $(IMG_C) $(IMG_W) $(IMG_H) $(FILTER_NUM) $(FILTER_SIZE)
 
 sim: memory
-	./../../build.sh -e lab3 -b
-	./../../build.sh -e lab3 -s
+	bash ./../../build.sh -e lab3 -b
+	bash ./../../build.sh -e lab3 -s
 
 clean:
 	./../../build.sh -e lab3 -c

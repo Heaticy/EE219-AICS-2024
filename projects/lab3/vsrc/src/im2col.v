@@ -20,6 +20,161 @@ module im2col #(
     output reg mem_wr_en
 );
 
+parameter FILTER_WINDOW_SIZE = FILTER_SIZE * FILTER_SIZE *IMG_C;
+parameter IMG_SIZE = IMG_W * IMG_H;
+reg [(IMG_C) * (IMG_W + 2)*(IMG_H + 2) - 1 : 0] IMG_PADDING_BUFFER;
+parameter IMG_C_WIDTH = $clog2(IMG_C);
+parameter IMG_W_WIDTH = $clog2(IMG_W + 2);
+parameter IMG_H_WIDTH = $clog2(IMG_H + 2);
+parameter FILTER_SIZE_WIDTH = $clog2(FILTER_SIZE);
+reg [IMG_C_WIDTH-1:0] channel;
+reg [IMG_W_WIDTH-1:0] col;
+reg [IMG_H_WIDTH-1:0] row;
+reg [FILTER_SIZE_WIDTH-1:0] filter_row;
+reg [FILTER_SIZE_WIDTH-1:0] filter_col;
+
+
+parameter IDLE = 0;
+parameter READING = 1;
+parameter WRITING = 2;
+parameter DONE = 3;
+
+reg [1:0] current_state;
+reg [1:0] next_state;
+
+always@(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        current_state <= IDLE;
+    end
+    else begin
+        current_state <= next_state;
+    end
+end
+
+always@(*)begin
+    case(current_state)
+        IDLE: begin
+            next_state = READING;
+        end
+        READING: begin
+            if (channel == IMG_C - 1 && row == IMG_H + 1 && col == IMG_W + 1) begin
+                next_state = WRITING;
+            end
+            else begin
+                next_state = READING;
+            end
+        end
+        WRITING: begin
+            if(channel == IMG_C - 1 && row == IMG_H - 1 && col == IMG_W - 1&& filter_row == FILTER_SIZE - 1 && filter_col == FILTER_SIZE - 1)begin
+                next_state = DONE;
+            end
+            else begin
+                next_state = WRITING;
+            end
+        end
+        DONE: begin
+            next_state = DONE;
+        end
+    endcase
+end
+
+always@(posedge clk or negedge rst_n)begin
+    if(!rst_n)begin
+        done <= 0;
+        channel <= 0;
+        col <= 0;
+        row <= 0;
+        filter_col <= 0;
+        filter_row <= 0;
+        addr_rd <= IMG_BASE;
+        addr_wr <= IM2COL_BASE;
+        mem_wr_en <= 0;
+        IMG_PADDING_BUFFER <= 0;
+    end
+    case(current_state)
+        IDLE: begin
+            done <= 0;
+            channel <= 0;
+            col <= 0;
+            row <= 0;
+            filter_col <= 0;
+            filter_row <= 0;
+            addr_rd <= IMG_BASE;
+            addr_wr <= IM2COL_BASE;
+            mem_wr_en <= 0;
+            IMG_PADDING_BUFFER <= 0;
+        end
+        READING: begin
+            done <= 0;
+            addr_rd <= addr_rd + DATA_WIDTH;
+            integer index;
+            index = (channel * (IMG_W + 2) * (IMG_H + 2)) + (row * (IMG_W + 2)) + col;
+            IMG_PADDING_BUFFER[(index + 1) * DATA_WIDTH - 1 -: DATA_WIDTH] <= data_rd;
+            if(col == IMG_W + 1)begin
+                col <= 0;
+                if(row == IMG_H + 1)begin
+                    row <= 0;
+                    if(channel == IMG_C - 1)begin
+                        channel <= 0;
+                    end
+                    else begin
+                        channel <= channel + 1;
+                    end
+                end
+                else begin
+                    row <= row + 1;
+                end
+            end
+            else begin
+                col <= col + 1;
+            end
+        end
+        WRITING: begin
+            done <= 0;
+            addr_wr <= addr_wr + DATA_WIDTH;
+            if(filter_col == FILTER_SIZE - 1)begin
+                filter_col <= 0;
+                if(filter_row == FILTER_SIZE - 1)begin
+                    filter_row <= 0;
+                    if(channel == IMG_C - 1)begin
+                        channel <= 0;
+                        if(col == IMG_W - 1)begin
+                            col <= 0;
+                            if(row == IMG_H - 1)begin
+                                row <= 0;
+                            end
+                            else begin
+                                row <= row + 1;
+                            end
+                        end
+                        else begin
+                            col <= col + 1;
+                        end
+                    end
+                    else begin
+                        channel <= channel + 1;
+                    end
+                end
+                else begin
+                    filter_row <= filter_row + 1;
+                end
+            end
+            else begin
+                filter_col <= filter_col + 1;
+            end
+            integer wr_row = row + filter_row;
+            integer wr_col = col + filter_col;
+            integer wr_index = channel * (IMG_H+2) * (IMG_W+2) + wr_row * (IMG_W+2) + wr_col;
+            data_wr <= IMG_PADDING_BUFFER[(wr_index + 1) * DATA_WIDTH - 1 -: DATA_WIDTH];
+        end
+        DONE: begin
+            done <= 1;
+            mem_wr_en <= 0;
+        end
+
+    endcase
+end
+
 assign done = 1; // you should overwrite this
 
 endmodule
