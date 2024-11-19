@@ -164,7 +164,7 @@ always@(posedge clk or negedge rst_n)begin
             else begin
                 filter_col <= filter_col + 1;
             end
-            data_wr <= IMG_PADDING_BUFFER[(channel * (IMG_H+2) * (IMG_W+2) + (row + filter_row) * (IMG_W+2) + col + filter_col + 1) * DATA_WIDTH - 1 -: DATA_WIDTH];
+            data_wr <= IMG_PADDING_BUFFER[(channel * (PADDING_H) * (PADDING_W) + (row + filter_row) * (PADDING_W) + col + filter_col + 1) * DATA_WIDTH - 1 -: DATA_WIDTH];
         end
         DONE: begin
             done <= 1;
