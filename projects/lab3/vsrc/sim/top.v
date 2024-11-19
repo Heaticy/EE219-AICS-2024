@@ -1,9 +1,9 @@
 `timescale 1ns / 1ps
 `define IMG_C 4
-`define IMG_W 1
-`define IMG_H 3
-`define FILTER_NUM 2
-`define FILTER_SIZE 1
+`define IMG_W 5
+`define IMG_H 5
+`define FILTER_NUM 7
+`define FILTER_SIZE 3
 `define DEBUG 0
 `define STATE_IDLE 0
 `define STATE_IM2COL 1
