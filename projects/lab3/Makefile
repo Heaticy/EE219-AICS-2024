@@ -18,7 +18,7 @@ sim: memory
 	bash ./../../build.sh -e lab3 -s
 
 clean:
-	./../../build.sh -e lab3 -c
+	bash ./../../build.sh -e lab3 -c
 	if [ -f "mem/mem_init.txt" ]; then rm -rf mem/mem_init.txt; fi
 	if [ -f "mem/mem_out.txt" ]; then rm -rf mem/mem_out.txt; fi
 	if [ -f "mem/status" ]; then rm -rf mem/status; fi
