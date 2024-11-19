@@ -132,6 +132,7 @@ always@(posedge clk or negedge rst_n)begin
         end
         WRITING: begin
             done <= 0;
+            mem_wr_en <= 1;
             addr_wr <= addr_wr + DATA_WIDTH;
             if(filter_col == FILTER_SIZE - 1)begin
                 filter_col <= 0;
