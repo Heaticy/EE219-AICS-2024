@@ -13,9 +13,9 @@ module im2col #(
     input clk,
     input rst_n,
     input [DATA_WIDTH-1:0] data_rd,
-    output [DATA_WIDTH-1:0] data_wr,
-    output [ADDR_WIDTH-1:0] addr_wr,
-    output [ADDR_WIDTH-1:0] addr_rd,
+    output reg[DATA_WIDTH-1:0] data_wr,
+    output reg[ADDR_WIDTH-1:0] addr_wr,
+    output reg[ADDR_WIDTH-1:0] addr_rd,
     output reg done,
     output reg mem_wr_en
 );
@@ -23,10 +23,13 @@ module im2col #(
 parameter FILTER_WINDOW_SIZE = FILTER_SIZE * FILTER_SIZE *IMG_C;
 parameter IMG_SIZE = IMG_W * IMG_H;
 reg [(IMG_C) * (IMG_W + 2)*(IMG_H + 2) - 1 : 0] IMG_PADDING_BUFFER;
-parameter IMG_C_WIDTH = $clog2(IMG_C);
-parameter IMG_W_WIDTH = $clog2(IMG_W + 2);
-parameter IMG_H_WIDTH = $clog2(IMG_H + 2);
-parameter FILTER_SIZE_WIDTH = $clog2(FILTER_SIZE);
+parameter IMG_C_WIDTH = 32;
+parameter IMG_W_WIDTH = 32;
+parameter IMG_H_WIDTH = 32;
+parameter FILTER_SIZE_WIDTH = 32;
+parameter PADDING_SIZE = (FILTER_SIZE - 1) / 2;
+parameter PADDING_W = IMG_W + 2*PADDING_SIZE;
+parameter PADDING_H = IMG_H + 2*PADDING_SIZE;
 reg [IMG_C_WIDTH-1:0] channel;
 reg [IMG_W_WIDTH-1:0] col;
 reg [IMG_H_WIDTH-1:0] row;
@@ -57,7 +60,7 @@ always@(*)begin
             next_state = READING;
         end
         READING: begin
-            if (channel == IMG_C - 1 && row == IMG_H + 1 && col == IMG_W + 1) begin
+            if (channel == IMG_C - 1 && row == PADDING_H - 1 && col == PADDING_W - 1) begin
                 next_state = WRITING;
             end
             else begin
@@ -107,12 +110,10 @@ always@(posedge clk or negedge rst_n)begin
         READING: begin
             done <= 0;
             addr_rd <= addr_rd + DATA_WIDTH;
-            integer index;
-            index = (channel * (IMG_W + 2) * (IMG_H + 2)) + (row * (IMG_W + 2)) + col;
-            IMG_PADDING_BUFFER[(index + 1) * DATA_WIDTH - 1 -: DATA_WIDTH] <= data_rd;
-            if(col == IMG_W + 1)begin
+            IMG_PADDING_BUFFER[( (channel * PADDING_W * PADDING_H) + (row * PADDING_W) + col + 1) * DATA_WIDTH - 1 -: DATA_WIDTH] <= data_rd;
+            if(col == PADDING_W -1)begin
                 col <= 0;
-                if(row == IMG_H + 1)begin
+                if(row == PADDING_H -1)begin
                     row <= 0;
                     if(channel == IMG_C - 1)begin
                         channel <= 0;
@@ -162,10 +163,7 @@ always@(posedge clk or negedge rst_n)begin
             else begin
                 filter_col <= filter_col + 1;
             end
-            integer wr_row = row + filter_row;
-            integer wr_col = col + filter_col;
-            integer wr_index = channel * (IMG_H+2) * (IMG_W+2) + wr_row * (IMG_W+2) + wr_col;
-            data_wr <= IMG_PADDING_BUFFER[(wr_index + 1) * DATA_WIDTH - 1 -: DATA_WIDTH];
+            data_wr <= IMG_PADDING_BUFFER[(channel * (IMG_H+2) * (IMG_W+2) + (row + filter_row) * (IMG_W+2) + col + filter_col + 1) * DATA_WIDTH - 1 -: DATA_WIDTH];
         end
         DONE: begin
             done <= 1;
