@@ -104,6 +104,7 @@ always@(posedge clk or negedge rst_n)begin
             filter_row <= 0;
             addr_rd <= IMG_BASE;
             addr_wr <= IM2COL_BASE;
+            data_wr <= 0;
             mem_wr_en <= 0;
             IMG_PADDING_BUFFER <= 0;
         end
