@@ -22,7 +22,7 @@ module im2col #(
 
 parameter FILTER_WINDOW_SIZE = FILTER_SIZE * FILTER_SIZE *IMG_C;
 parameter IMG_SIZE = IMG_W * IMG_H;
-reg [(IMG_C) * (IMG_W + 2)*(IMG_H + 2) - 1 : 0] IMG_PADDING_BUFFER;
+reg [(IMG_C) * (IMG_W + 2)*(IMG_H + 2)*DATA_WIDTH - 1 : 0] IMG_PADDING_BUFFER;
 parameter IMG_C_WIDTH = 32;
 parameter IMG_W_WIDTH = 32;
 parameter IMG_H_WIDTH = 32;
@@ -111,7 +111,7 @@ always@(posedge clk or negedge rst_n)begin
         READING: begin
             done <= 0;
             addr_rd <= addr_rd + DATA_WIDTH;
-            x<= ((channel * PADDING_W * PADDING_H) + (row * PADDING_W) + col + 1) * DATA_WIDTH - 1 ;
+            x<= (channel * PADDING_W * PADDING_H + row * PADDING_W + col + 1) * DATA_WIDTH - 1 ;
             IMG_PADDING_BUFFER[( (channel * PADDING_W * PADDING_H) + (row * PADDING_W) + col + 1) * DATA_WIDTH - 1 -: DATA_WIDTH] <= data_rd[DATA_WIDTH-1:0];
             if(col == PADDING_W -1)begin
                 col <= 0;
