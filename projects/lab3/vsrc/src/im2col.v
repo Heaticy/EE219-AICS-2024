@@ -22,14 +22,15 @@ module im2col #(
 
 parameter FILTER_WINDOW_SIZE = FILTER_SIZE * FILTER_SIZE *IMG_C;
 parameter IMG_SIZE = IMG_W * IMG_H;
-reg [(IMG_C) * (IMG_W + 2)*(IMG_H + 2)*DATA_WIDTH - 1 : 0] IMG_PADDING_BUFFER;
+parameter PADDING_SIZE = (FILTER_SIZE - 1) / 2;
+parameter PADDING_W = IMG_W + 2*PADDING_SIZE;
+parameter PADDING_H = IMG_H + 2*PADDING_SIZE;
+reg [(IMG_C) * PADDING_W * PADDING_H *DATA_WIDTH - 1 : 0] IMG_PADDING_BUFFER;
 parameter IMG_C_WIDTH = 32;
 parameter IMG_W_WIDTH = 32;
 parameter IMG_H_WIDTH = 32;
 parameter FILTER_SIZE_WIDTH = 32;
-parameter PADDING_SIZE = (FILTER_SIZE - 1) / 2;
-parameter PADDING_W = IMG_W + 2*PADDING_SIZE;
-parameter PADDING_H = IMG_H + 2*PADDING_SIZE;
+
 reg [IMG_C_WIDTH-1:0] channel;
 reg [IMG_W_WIDTH-1:0] col;
 reg [IMG_H_WIDTH-1:0] row;
