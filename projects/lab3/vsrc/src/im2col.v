@@ -117,6 +117,7 @@ always@(posedge clk or negedge rst_n)begin
                     row <= 0;
                     if(channel == IMG_C - 1)begin
                         channel <= 0;
+                        mem_wr_en <= 1;
                     end
                     else begin
                         channel <= channel + 1;
