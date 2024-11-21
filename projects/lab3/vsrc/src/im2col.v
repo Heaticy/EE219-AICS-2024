@@ -45,6 +45,7 @@ parameter DONE = 3;
 
 reg [1:0] current_state;
 reg [1:0] next_state;
+reg count;
 reg[31:0]x;
 always@(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
@@ -94,6 +95,7 @@ always@(posedge clk or negedge rst_n)begin
         addr_wr <= IM2COL_BASE;
         mem_wr_en <= 0;
         IMG_PADDING_BUFFER <= 0;
+        count <= 0;
     end
     case(current_state)
         IDLE: begin
@@ -113,7 +115,10 @@ always@(posedge clk or negedge rst_n)begin
             done <= 0;
             addr_rd <= addr_rd + 1;
             x<= (channel * PADDING_W * PADDING_H + row * PADDING_W + col + 1) * DATA_WIDTH - 1 ;
-            IMG_PADDING_BUFFER[(channel * PADDING_W * PADDING_H + row * PADDING_W + col + 1) * DATA_WIDTH - 1 -: DATA_WIDTH] <= data_rd[DATA_WIDTH-1:0];
+            count <= 1;
+            if (count) begin
+                IMG_PADDING_BUFFER[(channel * PADDING_W * PADDING_H + row * PADDING_W + col + 1) * DATA_WIDTH - 1 -: DATA_WIDTH] <= data_rd[DATA_WIDTH-1:0];
+            end
             if(col == PADDING_W -1)begin
                 col <= 0;
                 if(row == PADDING_H -1)begin
