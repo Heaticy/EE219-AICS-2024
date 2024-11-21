@@ -111,7 +111,7 @@ always@(posedge clk or negedge rst_n)begin
         end
         READING: begin
             done <= 0;
-            addr_rd <= addr_rd + DATA_WIDTH;
+            addr_rd <= addr_rd + 1;
             x<= (channel * PADDING_W * PADDING_H + row * PADDING_W + col + 1) * DATA_WIDTH - 1 ;
             IMG_PADDING_BUFFER[(channel * PADDING_W * PADDING_H + row * PADDING_W + col + 1) * DATA_WIDTH - 1 -: DATA_WIDTH] <= data_rd[DATA_WIDTH-1:0];
             if(col == PADDING_W -1)begin
@@ -137,7 +137,7 @@ always@(posedge clk or negedge rst_n)begin
         WRITING: begin
             done <= 0;
             mem_wr_en <= 1;
-            addr_wr <= addr_wr + DATA_WIDTH;
+            addr_wr <= addr_wr + 1;
             if(filter_col == FILTER_SIZE - 1)begin
                 filter_col <= 0;
                 if(filter_row == FILTER_SIZE - 1)begin
