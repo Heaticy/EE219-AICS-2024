@@ -119,25 +119,25 @@ always@(posedge clk or negedge rst_n)begin
             if (count) begin
                 IMG_PADDING_BUFFER[x -: DATA_WIDTH] <= data_rd[DATA_WIDTH-1:0];
             end
-            if(col == PADDING_W -1)begin
-                col <= 0;
-                if(row == PADDING_H -1)begin
-                    row <= 0;
-                    if(channel == IMG_C - 1)begin
-                        channel <= 0;
+            if (channel == IMG_C - 1)begin
+                channel <= 0;
+                if(col == PADDING_W -1)begin
+                    col <= 0;
+                    if(row == PADDING_H -1)begin
+                        row <= 0;
                         mem_wr_en <= 1;
                     end
                     else begin
-                        channel <= channel + 1;
+                        row <= row + 1;
                     end
                 end
                 else begin
-                    row <= row + 1;
+                    col <= col + 1;
                 end
             end
             else begin
-                col <= col + 1;
-            end
+                channel <= channel + 1;
+            end    
         end
         WRITING: begin
             done <= 0;
