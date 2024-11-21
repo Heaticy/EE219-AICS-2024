@@ -117,7 +117,7 @@ always@(posedge clk or negedge rst_n)begin
             x<= (channel * PADDING_W * PADDING_H + row * PADDING_W + col + 1) * DATA_WIDTH - 1 ;
             count <= 1;
             if (count) begin
-                IMG_PADDING_BUFFER[(channel * PADDING_W * PADDING_H + row * PADDING_W + col + 1) * DATA_WIDTH - 1 -: DATA_WIDTH] <= data_rd[DATA_WIDTH-1:0];
+                IMG_PADDING_BUFFER[x -: DATA_WIDTH] <= data_rd[DATA_WIDTH-1:0];
             end
             if(col == PADDING_W -1)begin
                 col <= 0;
