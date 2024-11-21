@@ -125,7 +125,7 @@ always@(posedge clk or negedge rst_n)begin
                     col <= 0;
                     if(row == PADDING_H -1)begin
                         row <= 0;
-                        mem_wr_en <= 1;
+                        count <= 0;
                     end
                     else begin
                         row <= row + 1;
@@ -140,6 +140,10 @@ always@(posedge clk or negedge rst_n)begin
             end    
         end
         WRITING: begin
+            count <= 1;
+            if(!count)begin
+                IMG_PADDING_BUFFER[x -: DATA_WIDTH] <= data_rd[DATA_WIDTH-1:0];
+            end
             done <= 0;
             mem_wr_en <= 1;
             addr_wr <= addr_wr + 1;
