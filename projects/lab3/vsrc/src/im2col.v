@@ -155,23 +155,23 @@ always@(posedge clk or negedge rst_n)begin
                 filter_col <= 0;
                 if(filter_row == FILTER_SIZE - 1)begin
                     filter_row <= 0;
-                    if(channel == IMG_C - 1)begin
-                        channel <= 0;
-                        if(col == IMG_W - 1)begin
-                            col <= 0;
-                            if(row == IMG_H - 1)begin
-                                row <= 0;
+                    if(col == IMG_W - 1)begin
+                        col <= 0;
+                        if(row == IMG_H - 1)begin
+                            row <= 0;
+                            if(channel == IMG_C - 1)begin
+                                channel <= 0;
                             end
                             else begin
-                                row <= row + 1;
+                                channel <= channel + 1;
                             end
                         end
                         else begin
-                            col <= col + 1;
+                            row <= row + 1;
                         end
                     end
                     else begin
-                        channel <= channel + 1;
+                        col <= col + 1;
                     end
                 end
                 else begin
