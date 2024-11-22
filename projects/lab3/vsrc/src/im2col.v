@@ -101,8 +101,8 @@ always@(posedge clk or negedge rst_n)begin
         IDLE: begin
             done <= 0;
             channel <= 0;
-            col <= 0;
-            row <= 0;
+            col <= PADDING_SIZE;
+            row <= PADDING_SIZE;
             filter_col <= 0;
             filter_row <= 0;
             addr_rd <= IMG_BASE;
