@@ -181,6 +181,7 @@ always@(posedge clk or negedge rst_n)begin
             else begin
                 filter_col <= filter_col + 1;
             end
+            x <= (channel * PADDING_H * PADDING_W + (row + filter_row) * PADDING_W + col + filter_col + 1);
             data_wr[DATA_WIDTH-1:0] <= IMG_PADDING_BUFFER[(channel * PADDING_H * PADDING_W + (row + filter_row) * PADDING_W + col + filter_col + 1) * DATA_WIDTH - 1 -: DATA_WIDTH];
         end
         DONE: begin
