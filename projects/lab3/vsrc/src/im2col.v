@@ -147,6 +147,7 @@ always@(posedge clk or negedge rst_n)begin
                 addr_wr <= IM2COL_BASE;
                 x <= DATA_WIDTH - 1;
                 count <= 1;
+                data_wr[DATA_WIDTH-1:0] <= IMG_PADDING_BUFFER[x -: DATA_WIDTH];
             end
             else begin
                 addr_wr <= addr_wr + 1;
