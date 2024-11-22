@@ -124,7 +124,7 @@ always@(posedge clk or negedge rst_n)begin
                 if(col == PADDING_W -1 - PADDING_SIZE)begin
                     col <= PADDING_SIZE;
                     if(row == PADDING_H -1 - PADDING_SIZE)begin
-                        row <= PADDING_SIZE;
+                        row <= 0;
                         count <= 0;
                     end
                     else begin
