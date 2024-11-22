@@ -62,7 +62,7 @@ always@(*)begin
             next_state = READING;
         end
         READING: begin
-            if (channel == IMG_C - 1 && row == PADDING_H - 1 && col == PADDING_W - 1) begin
+            if (channel == IMG_C - 1 && row == PADDING_H - 1 -PADDING_SIZE && col == PADDING_W - 1 - PADDING_SIZE) begin
                 next_state = WRITING;
             end
             else begin
@@ -121,10 +121,10 @@ always@(posedge clk or negedge rst_n)begin
             end
             if (channel == IMG_C - 1)begin
                 channel <= 0;
-                if(col == PADDING_W -1)begin
-                    col <= 0;
-                    if(row == PADDING_H -1)begin
-                        row <= 0;
+                if(col == PADDING_W -1 - PADDING_SIZE)begin
+                    col <= PADDING_SIZE;
+                    if(row == PADDING_H -1 - PADDING_SIZE)begin
+                        row <= PADDING_SIZE;
                         count <= 0;
                     end
                     else begin
