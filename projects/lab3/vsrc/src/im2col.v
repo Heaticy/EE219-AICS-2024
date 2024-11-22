@@ -145,45 +145,43 @@ always@(posedge clk or negedge rst_n)begin
                 done <= 0;
                 mem_wr_en <= 1;
                 addr_wr <= IM2COL_BASE;
-                x <= DATA_WIDTH - 1;
                 count <= 1;
-                data_wr[DATA_WIDTH-1:0] <= IMG_PADDING_BUFFER[x -: DATA_WIDTH];
+                data_wr[DATA_WIDTH-1:0] <= IMG_PADDING_BUFFER[DATA_WIDTH-1:0];
             end
             else begin
                 addr_wr <= addr_wr + 1;
-                if(filter_col == FILTER_SIZE - 1)begin
-                    filter_col <= 0;
-                    if(filter_row == FILTER_SIZE - 1)begin
-                        filter_row <= 0;
-                        if(channel == IMG_C - 1)begin
-                            channel <= 0;
-                            if(col == IMG_W - 1)begin
-                                col <= 0;
-                                if(row == IMG_H - 1)begin
-                                    row <= 0;
-                                end
-                                else begin
-                                    row <= row + 1;
-                                end
+            end
+            if(filter_col == FILTER_SIZE - 1)begin
+                filter_col <= 0;
+                if(filter_row == FILTER_SIZE - 1)begin
+                    filter_row <= 0;
+                    if(channel == IMG_C - 1)begin
+                        channel <= 0;
+                        if(col == IMG_W - 1)begin
+                            col <= 0;
+                            if(row == IMG_H - 1)begin
+                                row <= 0;
                             end
                             else begin
-                                col <= col + 1;
+                                row <= row + 1;
                             end
                         end
                         else begin
-                            channel <= channel + 1;
+                            col <= col + 1;
                         end
                     end
                     else begin
-                        filter_row <= filter_row + 1;
+                        channel <= channel + 1;
                     end
                 end
                 else begin
-                    filter_col <= filter_col + 1;
+                    filter_row <= filter_row + 1;
                 end
-                x<=(channel * PADDING_H * PADDING_W + (row + filter_row) * PADDING_W + col + filter_col + 1) * DATA_WIDTH - 1;
-                data_wr[DATA_WIDTH-1:0] <= IMG_PADDING_BUFFER[x -: DATA_WIDTH];
             end
+            else begin
+                filter_col <= filter_col + 1;
+            end
+            data_wr[DATA_WIDTH-1:0] <= IMG_PADDING_BUFFER[(channel * PADDING_H * PADDING_W + (row + filter_row) * PADDING_W + col + filter_col + 1) * DATA_WIDTH - 1 -: DATA_WIDTH];
         end
         DONE: begin
             done <= 1;
