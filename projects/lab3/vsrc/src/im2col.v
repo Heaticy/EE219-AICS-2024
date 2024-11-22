@@ -151,14 +151,14 @@ always@(posedge clk or negedge rst_n)begin
             else begin
                 addr_wr <= addr_wr + 1;
             end
-            if(filter_col == FILTER_SIZE - 1)begin
-                filter_col <= 0;
-                if(filter_row == FILTER_SIZE - 1)begin
-                    filter_row <= 0;
-                    if(col == IMG_W - 1)begin
-                        col <= 0;
-                        if(row == IMG_H - 1)begin
-                            row <= 0;
+            if(col == IMG_W - 1)begin
+                col <= 0;
+                if(row == IMG_H - 1)begin
+                    row <= 0;
+                    if(filter_col == FILTER_SIZE - 1)begin
+                        filter_col <= 0;
+                        if(filter_row == FILTER_SIZE - 1)begin
+                            filter_row <= 0;
                             if(channel == IMG_C - 1)begin
                                 channel <= 0;
                             end
@@ -167,20 +167,21 @@ always@(posedge clk or negedge rst_n)begin
                             end
                         end
                         else begin
-                            row <= row + 1;
+                            filter_row <= filter_row + 1;
                         end
                     end
                     else begin
-                        col <= col + 1;
+                        filter_col <= filter_col + 1;
                     end
                 end
                 else begin
-                    filter_row <= filter_row + 1;
+                    row <= row + 1;
                 end
             end
             else begin
-                filter_col <= filter_col + 1;
+                col <= col + 1;
             end
+
             x <= (channel * PADDING_H * PADDING_W + (row + filter_row) * PADDING_W + col + filter_col + 1);
             data_wr[DATA_WIDTH-1:0] <= IMG_PADDING_BUFFER[(channel * PADDING_H * PADDING_W + (row + filter_row) * PADDING_W + col + filter_col + 1) * DATA_WIDTH - 1 -: DATA_WIDTH];
         end
