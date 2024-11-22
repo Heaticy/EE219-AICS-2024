@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-`define IMG_C 3
+`define IMG_C 1
 `define IMG_W 1
 `define IMG_H 1
 `define FILTER_NUM 2

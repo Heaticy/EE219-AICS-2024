@@ -1,4 +1,4 @@
-IMG_C = 3
+IMG_C = 1
 IMG_W = 1
 IMG_H = 1
 FILTER_NUM = 2
