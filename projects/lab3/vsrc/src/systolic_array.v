@@ -52,6 +52,9 @@ wire [DATA_WIDTH-1:0] x_wire [0:M-1][0:K];
 wire [DATA_WIDTH-1:0] w_wire [0:M][0:K-1];
 wire [DATA_WIDTH-1:0] y_wire [0:M-1][0:K-1];
 
+assign x_wire[0][0] = X[DATA_WIDTH - 1:0];
+assign w_wire[0][0] = W[DATA_WIDTH - 1:0];
+
 genvar i, j;
 generate
     for (i = 1; i < M; i = i + 1) begin : row
@@ -65,15 +68,15 @@ generate
             .data_out(x_wire[i][0])
         );
     end
-    for (i = 1; i < K; i = i + 1) begin : col
+    for (j = 1; j < K; j = j + 1) begin : col
         FIFO #(
             .DATA_WIDTH(DATA_WIDTH),
-            .FIFO_LEN(i)
+            .FIFO_LEN(j)
         ) fifo_inst (
             .clk(clk),
             .rst_n(rst_n),
-            .data_in( W[DATA_WIDTH*(i+1)-1:DATA_WIDTH*i]),
-            .data_out(w_wire[0][i])
+            .data_in( W[DATA_WIDTH*(j+1)-1:DATA_WIDTH*j]),
+            .data_out(w_wire[0][j])
         );
     end
 endgenerate
@@ -90,9 +93,9 @@ generate
                 .clk(clk),
                 .rst(rst_n),
                 // Input X: the first column gets input from the external X signal, others get from previous column
-                .x_in((i == 0) ? X[DATA_WIDTH - 1:0] : x_wire[i][j]),
+                .x_in(x_wire[i][j]),
                 // Input W: the first row gets input from the external W signal, others get from the previous row
-                .w_in((j == 0) ? W[DATA_WIDTH - 1:0] : w_wire[i][j]),
+                .w_in(w_wire[i][j]),
                 // Output signals to be passed to the next PE
                 .x_out(x_wire[i][j + 1]),
                 .w_out(w_wire[i + 1][j]),
@@ -125,6 +128,6 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-assign done = (count > M + N + K +1 );
+assign done = (count > M + N + K + 1 );
 
 endmodule
