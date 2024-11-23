@@ -125,6 +125,6 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-assign done = (count > M + N + K );
+assign done = (count > M + N + K +1 );
 
 endmodule
