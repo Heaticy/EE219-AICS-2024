@@ -48,8 +48,8 @@ module systolic_array#(
 reg [31:0] count;
 
 // Declare wires for interconnecting PEs
-wire [DATA_WIDTH-1:0] x_wire [0:M-1][0:K-1];
-wire [DATA_WIDTH-1:0] w_wire [0:M-1][0:K-1];
+wire [DATA_WIDTH-1:0] x_wire [0:M-1][0:K];
+wire [DATA_WIDTH-1:0] w_wire [0:M][0:K-1];
 wire [DATA_WIDTH-1:0] y_wire [0:M-1][0:K-1];
 
 genvar i, j;
@@ -94,8 +94,8 @@ generate
                 // Input W: the first row gets input from the external W signal, others get from the previous row
                 .w_in((j == 0) ? W[DATA_WIDTH - 1:0] : w_wire[i][j]),
                 // Output signals to be passed to the next PE
-                .x_out(x_wire[i][j]),
-                .w_out(w_wire[i][j]),
+                .x_out(x_wire[i][j + 1]),
+                .w_out(w_wire[i + 1][j]),
                 .y_out(y_wire[i][j])
             );
         end
@@ -125,6 +125,6 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-assign done = (count > M + N + K+2 );
+assign done = (count > M + N + K );
 
 endmodule
