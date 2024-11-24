@@ -2,7 +2,7 @@
 `define IMG_C 3
 `define IMG_W 3
 `define IMG_H 3
-`define FILTER_NUM 2
+`define FILTER_NUM 5
 `define FILTER_SIZE 3
 `define DEBUG 0
 `define STATE_IDLE 0
