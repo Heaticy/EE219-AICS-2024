@@ -117,7 +117,7 @@ fi
 BUILD_PATH=$PROJECT_PATH/$BUILD_FOLDER
 BIN_PATH=$ICS_PATH/$PROJECT_FOLDER/$BIN_FOLDER
 
-Get id and name
+#Get id and name
 ID=`sed '/^ID=/!d;s/.*=//' $MYINFO_FILE`
 NAME=`sed '/^Name=/!d;s/.*=//' $MYINFO_FILE`
 if [[ ${#ID} -le 1 ]] || [[ ${#NAME} -le 1 ]]; then
