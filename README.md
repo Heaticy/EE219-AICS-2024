@@ -29,7 +29,7 @@ If you want to learn about the compiling script, you can read the introduction.
 |-- projects              # Folder of main projects
 ```
 1. `README.md` is the project's description document.
-2. The `build.sh` is a verilator compilation script that greatly simplifies the compilation of vialtor. At the same time, this script can record the user's compilation history to avoid faking. **Note: Modification of this script is forbidden!!!**
+2. The `build.sh` is a verilator compilation script that greatly simplifies the compilation of verilator. At the same time, this script can record the user's compilation history to avoid faking. **Note: Modification of this script is forbidden!!!**
 3. The `myinfo.txt` records the user's personal information, which should be updated in this file first after entering the environment for the first time. The compile script records this information when it records the user's compile history. If personal information is written, the compile script will not work.
 4. The directory `demo`, holds demo file to validate the environment setup.
 5. The directory `doc`,  holds the relevant documentation and some manuals about RISC-V.

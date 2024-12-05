@@ -21,6 +21,11 @@ First of all, you should fill your information in [myinfo.txt](../myinfo.txt)
 ## Verilator Demo
 
 Open a new terminal and input the following commands. 
+```bash
+cd EE219-AICS-2024
+sudo chmod +x build.sh
+./build.sh -e demo -b -s
+```
 
 Note: When executing the second command, the terminal will ask you to input the test cycles and you can randomly input a number.
 

@@ -2,7 +2,7 @@
 
 ## Usage
 
-The `build.sh` is a verilator compilation script that greatly simplifies the compilation of vialtor. At the same time, this script can record the user's compilation history to avoid faking.
+The `build.sh` is a verilator compilation script that greatly simplifies the compilation of verilator. At the same time, this script can record the user's compilation history to avoid faking.
 
 ## Parameter
 

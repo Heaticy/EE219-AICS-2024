@@ -96,8 +96,8 @@ end
 always@(posedge clk) begin
     case(state)
         `STATE_IDLE: begin
-            rst_im2col      <= 1;
-            rst_systolic    <= 1;
+            rst_im2col      <= 0;
+            rst_systolic    <= 0;
             $writememh("../mem/mem_out.txt", mem);
             if (!rst_n) begin
                 state       <= `STATE_IDLE;
