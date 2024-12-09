@@ -16,15 +16,15 @@ module si_alu #(
     input   [ALUOP_DW-1:0]  alu_opcode_i,
     input   [REG_DW-1:0]    operand_1_i,
     input   [REG_DW-1:0]    operand_2_i,
-    output  [REG_DW-1:0]    alu_result_o,
+    output  reg[REG_DW-1:0]    alu_result_o,
     // branch
     input   [INST_AW-1:0]   current_pc_i,
     input                   branch_en_i,
     input   [INST_AW-1:0]   branch_offset_i,
     input                   jump_en_i,
     input   [INST_AW-1:0]   jump_offset_i,
-    output                  control_en_o,
-    output  [INST_AW-1:0]   control_pc_o
+    output  reg            control_en_o,
+    output  reg[INST_AW-1:0]   control_pc_o
 );
 
 localparam ALU_OP_NOP   = 5'd0 ;
@@ -39,67 +39,70 @@ localparam ALU_OP_SLL   = 5'd8 ;
 localparam ALU_OP_SLT   = 5'd9 ;
 localparam ALU_OP_BLT   = 5'd10 ;
 
-case (alu_opcode_i)
-    ALU_OP_NOP: begin
-        alu_result_o = 32'h0;
-        control_en_o = 1'b0;
-        control_pc_o = current_pc_i;
-    end
-    ALU_OP_ADD: begin
-        alu_result_o = operand_1_i + operand_2_i;
-        control_en_o = 1'b0;
-        control_pc_o = current_pc_i;
-    end
-    ALU_OP_MUL: begin
-        alu_result_o = operand_1_i * operand_2_i;
-        control_en_o = 1'b0;
-        control_pc_o = current_pc_i;
-    end
-    ALU_OP_BNE: begin
-        alu_result_o = 32'h0;
-        control_en_o = branch_en_i && (operand_1_i != operand_2_i);
-        control_pc_o = branch_offset_i;
-    end
-    ALU_OP_JAL: begin
-        alu_result_o = current_pc_i + 4;
-        control_en_o = 1'b1;
-        control_pc_o = jump_offset_i;
-    end
-    ALU_OP_LUI: begin
-        alu_result_o = {operand_2_i, 12'h0};
-        control_en_o = 1'b0;
-        control_pc_o = current_pc_i;
-    end
-    ALU_OP_AUIPC: begin
-        alu_result_o = current_pc_i + operand_2_i;
-        control_en_o = 1'b0;
-        control_pc_o = current_pc_i;
-    end
-    ALU_OP_AND: begin
-        alu_result_o = operand_1_i & operand_2_i;
-        control_en_o = 1'b0;
-        control_pc_o = current_pc_i;
-    end
-    ALU_OP_SLL: begin
-        alu_result_o = operand_1_i << operand_2_i;
-        control_en_o = 1'b0;
-        control_pc_o = current_pc_i;
-    end
-    ALU_OP_SLT: begin
-        alu_result_o = (operand_1_i < operand_2_i) ? 32'h1 : 32'h0;
-        control_en_o = 1'b0;
-        control_pc_o = current_pc_i;
-    end
-    ALU_OP_BLT: begin
-        alu_result_o = 32'h0;
-        control_en_o = branch_en_i && (operand_1_i < operand_2_i);
-        control_pc_o = branch_offset_i;
-    end
-    default: begin
-        alu_result_o = 32'h0;
-        control_en_o = 1'b0;
-        control_pc_o = current_pc_i;
-    end
-endcase
+
+always@(*)begin
+    case (alu_opcode_i)
+        ALU_OP_NOP: begin
+            alu_result_o = 32'h0;
+            control_en_o = 1'b0;
+            control_pc_o = current_pc_i;
+        end
+        ALU_OP_ADD: begin
+            alu_result_o = operand_1_i + operand_2_i;
+            control_en_o = 1'b0;
+            control_pc_o = current_pc_i;
+        end
+        ALU_OP_MUL: begin
+            alu_result_o = operand_1_i * operand_2_i;
+            control_en_o = 1'b0;
+            control_pc_o = current_pc_i;
+        end
+        ALU_OP_BNE: begin
+            alu_result_o = 32'h0;
+            control_en_o = branch_en_i && (operand_1_i != operand_2_i);
+            control_pc_o = current_pc_i + branch_offset_i;
+        end
+        ALU_OP_JAL: begin
+            alu_result_o = current_pc_i + 4;
+            control_en_o = 1'b1;
+            control_pc_o = current_pc_i + jump_offset_i;
+        end
+        ALU_OP_LUI: begin
+            alu_result_o = operand_2_i;
+            control_en_o = 1'b0;
+            control_pc_o = current_pc_i;
+        end
+        ALU_OP_AUIPC: begin
+            alu_result_o = current_pc_i + operand_2_i;
+            control_en_o = 1'b0;
+            control_pc_o = current_pc_i;
+        end
+        ALU_OP_AND: begin
+            alu_result_o = operand_1_i & operand_2_i;
+            control_en_o = 1'b0;
+            control_pc_o = current_pc_i;
+        end
+        ALU_OP_SLL: begin
+            alu_result_o = operand_1_i << operand_2_i;
+            control_en_o = 1'b0;
+            control_pc_o = current_pc_i;
+        end
+        ALU_OP_SLT: begin
+            alu_result_o = (operand_1_i < operand_2_i) ? 32'h1 : 32'h0;
+            control_en_o = 1'b0;
+            control_pc_o = current_pc_i;
+        end
+        ALU_OP_BLT: begin
+            alu_result_o = 32'h0;
+            control_en_o = branch_en_i && (operand_1_i < operand_2_i);
+            control_pc_o = current_pc_i + branch_offset_i;
+        end
+        default: begin
+            alu_result_o = 32'h0;
+            control_en_o = 1'b0;
+            control_pc_o = current_pc_i;
+        end
+    endcase
+end
 
 endmodule 
