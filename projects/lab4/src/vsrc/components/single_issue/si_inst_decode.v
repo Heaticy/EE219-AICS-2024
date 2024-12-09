@@ -55,4 +55,11 @@ localparam ALU_OP_SLL   = 5'd8 ;
 localparam ALU_OP_SLT   = 5'd9 ;
 localparam ALU_OP_BLT   = 5'd10 ;
 
+wire [6:0] opcode = inst_i[6:0];
+wire [6:0] funct3 = inst_i[14:12];
+wire [6:0] funct7 = inst_i[31:25];
+wire [4:0] rs1 = inst_i[19:15];
+wire [4:0] rs2 = inst_i[24:20];
+wire [4:0] rd = inst_i[11:7];
+
 endmodule 

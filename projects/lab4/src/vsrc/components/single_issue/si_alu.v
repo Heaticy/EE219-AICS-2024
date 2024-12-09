@@ -39,4 +39,67 @@ localparam ALU_OP_SLL   = 5'd8 ;
 localparam ALU_OP_SLT   = 5'd9 ;
 localparam ALU_OP_BLT   = 5'd10 ;
 
+case (alu_opcode_i)
+    ALU_OP_NOP: begin
+        alu_result_o = 32'h0;
+        control_en_o = 1'b0;
+        control_pc_o = current_pc_i;
+    end
+    ALU_OP_ADD: begin
+        alu_result_o = operand_1_i + operand_2_i;
+        control_en_o = 1'b0;
+        control_pc_o = current_pc_i;
+    end
+    ALU_OP_MUL: begin
+        alu_result_o = operand_1_i * operand_2_i;
+        control_en_o = 1'b0;
+        control_pc_o = current_pc_i;
+    end
+    ALU_OP_BNE: begin
+        alu_result_o = 32'h0;
+        control_en_o = branch_en_i && (operand_1_i != operand_2_i);
+        control_pc_o = branch_offset_i;
+    end
+    ALU_OP_JAL: begin
+        alu_result_o = current_pc_i + 4;
+        control_en_o = 1'b1;
+        control_pc_o = jump_offset_i;
+    end
+    ALU_OP_LUI: begin
+        alu_result_o = {operand_2_i, 12'h0};
+        control_en_o = 1'b0;
+        control_pc_o = current_pc_i;
+    end
+    ALU_OP_AUIPC: begin
+        alu_result_o = current_pc_i + operand_2_i;
+        control_en_o = 1'b0;
+        control_pc_o = current_pc_i;
+    end
+    ALU_OP_AND: begin
+        alu_result_o = operand_1_i & operand_2_i;
+        control_en_o = 1'b0;
+        control_pc_o = current_pc_i;
+    end
+    ALU_OP_SLL: begin
+        alu_result_o = operand_1_i << operand_2_i;
+        control_en_o = 1'b0;
+        control_pc_o = current_pc_i;
+    end
+    ALU_OP_SLT: begin
+        alu_result_o = (operand_1_i < operand_2_i) ? 32'h1 : 32'h0;
+        control_en_o = 1'b0;
+        control_pc_o = current_pc_i;
+    end
+    ALU_OP_BLT: begin
+        alu_result_o = 32'h0;
+        control_en_o = branch_en_i && (operand_1_i < operand_2_i);
+        control_pc_o = branch_offset_i;
+    end
+    default: begin
+        alu_result_o = 32'h0;
+        control_en_o = 1'b0;
+        control_pc_o = current_pc_i;
+    end
+endcase
+
 endmodule 
