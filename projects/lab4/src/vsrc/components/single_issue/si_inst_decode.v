@@ -111,9 +111,13 @@ always@(*)begin
                     alu_opcode_o = ALU_OP_ADD;
                     imm_gen = {{20{inst_i[31]}}, inst_i[31:20]};
                 end
-                3'b010: begin//SLLI
-                    alu_opcode_o = ALU_OP_SLT;
+                3'b001: begin//SLLI
+                    alu_opcode_o = ALU_OP_SLL;
                     imm_gen = {{27{1'b0}}, inst_i[24:20]};
+                end
+                3'b010: begin//SLTI
+                    alu_opcode_o = ALU_OP_SLT;
+                    imm_gen = {{20{inst_i[31]}}, inst_i[31:20]};
                 end
                 default: begin
                     alu_opcode_o = ALU_OP_NOP;

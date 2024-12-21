@@ -83,7 +83,7 @@ always@(*)begin
             control_pc_o = current_pc_i;
         end
         ALU_OP_SLL: begin
-            alu_result_o = operand_1_i << operand_2_i;
+            alu_result_o = operand_1_i << operand_2_i[4:0];
             control_en_o = 1'b0;
             control_pc_o = current_pc_i;
         end
