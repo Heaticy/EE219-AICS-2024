@@ -1,5 +1,5 @@
 
-module v_mem_access #(
+module v3_mem_access #(
     parameter VMEM_DW   = 256,
     parameter VMEM_AW   = 32,
     parameter VRAM_DW   = 256,

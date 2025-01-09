@@ -27,10 +27,16 @@ always@(*)begin
             valu_result_o = 256'h0;
         end
         VALU_OP_VADD: begin
-            valu_result_o = operand_v1_i + operand_v2_i;
+            valu_result_o = {{operand_v1_i[8*SEW-1-:SEW] + operand_v2_i[8*SEW-1-:SEW]},{operand_v1_i[7*SEW-1-:SEW] + operand_v2_i[7*SEW-1-:SEW]},
+                              {operand_v1_i[6*SEW-1-:SEW] + operand_v2_i[6*SEW-1-:SEW]},{operand_v1_i[5*SEW-1-:SEW] + operand_v2_i[5*SEW-1-:SEW]},
+                                {operand_v1_i[4*SEW-1-:SEW] + operand_v2_i[4*SEW-1-:SEW]},{operand_v1_i[3*SEW-1-:SEW] + operand_v2_i[3*SEW-1-:SEW]},
+                                    {operand_v1_i[2*SEW-1-:SEW] + operand_v2_i[2*SEW-1-:SEW]},{operand_v1_i[1*SEW-1-:SEW] + operand_v2_i[1*SEW-1-:SEW]}};
         end
         VALU_OP_VMUL: begin
-            valu_result_o = operand_v1_i * operand_v2_i;
+            valu_result_o = {{operand_v1_i[8*SEW-1-:SEW] * operand_v2_i[8*SEW-1-:SEW]},{operand_v1_i[7*SEW-1-:SEW] * operand_v2_i[7*SEW-1-:SEW]},
+                              {operand_v1_i[6*SEW-1-:SEW] * operand_v2_i[6*SEW-1-:SEW]},{operand_v1_i[5*SEW-1-:SEW] * operand_v2_i[5*SEW-1-:SEW]},
+                                {operand_v1_i[4*SEW-1-:SEW] * operand_v2_i[4*SEW-1-:SEW]},{operand_v1_i[3*SEW-1-:SEW] * operand_v2_i[3*SEW-1-:SEW]},
+                                    {operand_v1_i[2*SEW-1-:SEW] * operand_v2_i[2*SEW-1-:SEW]},{operand_v1_i[1*SEW-1-:SEW] * operand_v2_i[1*SEW-1-:SEW]}};
         end
         default: begin
             valu_result_o = 256'h0;

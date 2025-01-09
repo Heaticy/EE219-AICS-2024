@@ -18,4 +18,8 @@ module v_wb_1 #(
     output  [VREG_DW-1:0]   vwb_data_o
 );
 
+assign vwb_en_o     = vid_wb_en_i ;
+assign vwb_addr_o   = vid_wb_addr_i ;
+assign vwb_data_o   = valu_result_i ;
+
 endmodule 

@@ -62,10 +62,10 @@ compile:
 	$(MAKE) -C ./sw ARCH=riscv64-mycpu ALL=$(CFILE)
 
 build:
-	./hw/build.sh -b 
+	bash ./hw/build.sh -b 
 
 sim: build model compile
-	./hw/build.sh -s -a "$(INST_FULLPATH) $(IMG_PULLPATH) $(DATA_FULLPATH) $(SAVE_FULLPATH) $(SIM_TIME) $(HALF_CYCLE)"
+	bash ./hw/build.sh -s -a "$(INST_FULLPATH) $(IMG_PULLPATH) $(DATA_FULLPATH) $(SAVE_FULLPATH) $(SIM_TIME) $(HALF_CYCLE)"
 
 run: sim
 	@echo Done

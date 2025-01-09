@@ -98,10 +98,10 @@ always @(*) begin
                             operand_v1_o = vs1_dout_i;
                         end
                         3'b011: begin
-                            operand_v1_o = {{(VMEM_DW-4){inst_i[19]}},inst_i[18:15]};
+                            operand_v1_o = {8{{28{inst_i[19]}},inst_i[18:15]}};
                         end
                         3'b100: begin
-                            operand_v1_o = {{(VMEM_DW-32){rs1_dout_i[31]}},rs1_dout_i[31:0]};
+                            operand_v1_o = {8{rs1_dout_i[31:0]}};
                         end
                         default: begin
                             operand_v1_o = vs1_dout_i;
@@ -115,10 +115,10 @@ always @(*) begin
                             operand_v1_o = vs1_dout_i;
                         end
                         3'b011: begin
-                            operand_v1_o = {{(VMEM_DW-4){inst_i[19]}},inst_i[18:15]};
+                            operand_v1_o = {8{{28{inst_i[19]}},inst_i[18:15]}};
                         end
                         3'b100: begin
-                            operand_v1_o = {{(VMEM_DW-32){rs1_dout_i[31]}},rs1_dout_i[31:0]};
+                            operand_v1_o = {8{rs1_dout_i[31:0]}};
                         end
                         default: begin
                             operand_v1_o = vs1_dout_i;

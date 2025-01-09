@@ -20,34 +20,67 @@ module v_id_2 #(
 
     input   [INST_DW-1:0]   inst_i,
 
-    output                  rs1_en_o,
-    output  [REG_AW-1:0]    rs1_addr_o,
+    output  reg                rs1_en_o,
+    output  reg[REG_AW-1:0]    rs1_addr_o,
     input   [REG_DW-1:0]    rs1_dout_i,
 
-    output                  vs1_en_o,
-    output  [VREG_AW-1:0]   vs1_addr_o,
+    output  reg                vs1_en_o,
+    output  reg[VREG_AW-1:0]   vs1_addr_o,
     input   [VREG_DW-1:0]   vs1_dout_i,
 
-    output                  vs2_en_o,
-    output  [VREG_AW-1:0]   vs2_addr_o,
+    output  reg                vs2_en_o,
+    output  reg[VREG_AW-1:0]   vs2_addr_o,
     input   [VREG_DW-1:0]   vs2_dout_i,
 
-    output  [VALUOP_DW-1:0] valu_opcode_o,
-    output  [VREG_DW-1:0]   operand_v1_o,
-    output  [VREG_DW-1:0]   operand_v2_o,
+    output  reg[VALUOP_DW-1:0] valu_opcode_o,
+    output  reg[VREG_DW-1:0]   operand_v1_o,
+    output  reg[VREG_DW-1:0]   operand_v2_o,
 
-    output                  vmem_ren_o,
-    output                  vmem_wen_o,
-    output  [VMEM_AW-1:0]   vmem_addr_o,
-    output  [VMEM_DW-1:0]   vmem_din_o,
+    output  reg                vmem_ren_o,
+    output  reg                vmem_wen_o,
+    output  reg[VMEM_AW-1:0]   vmem_addr_o,
+    output  reg[VMEM_DW-1:0]   vmem_din_o,
 
-    output                  vid_wb_en_o,
-    output  [VREG_AW-1:0]   vid_wb_addr_o
+    output  reg                vid_wb_en_o,
+    output  reg[VREG_AW-1:0]   vid_wb_addr_o
 );
 
 localparam VALU_OP_NOP  = 5'd0 ;
 localparam VALU_OP_VADD = 5'd1 ;
 localparam VALU_OP_VMUL = 5'd2 ;
+
+wire [6:0] opcode = inst_i[6:0];
+assign vid_wb_addr_o = inst_i[11:7];
+assign rs1_en_o = 1'b1;
+assign rs1_addr_o = inst_i[19:15];
+assign vs1_en_o = 1'b0;
+assign vs1_addr_o = 5'b0;
+assign vs2_en_o = 1'b1;
+assign vs2_addr_o = inst_i[11:7];
+assign operand_v1_o = vs1_dout_i;
+assign operand_v2_o = vs2_dout_i;
+assign vmem_addr_o = rs1_dout_i;
+assign vmem_din_o = vs2_dout_i;
+assign valu_opcode_o = VALU_OP_NOP;
+
+always @(*) begin
+    case (opcode)
+        7'b0000111: begin
+            vmem_ren_o = 1'b1;
+            vmem_wen_o = 1'b0;
+            vid_wb_en_o = 1'b1;
+        end
+        7'b0100111: begin
+            vmem_ren_o = 1'b0;
+            vmem_wen_o = 1'b1;
+            vid_wb_en_o = 1'b0;
+        end
+        default: begin
+            vmem_ren_o = 1'b0;
+            vmem_wen_o = 1'b0;
+        end
+    endcase
+end
 
 endmodule
 
