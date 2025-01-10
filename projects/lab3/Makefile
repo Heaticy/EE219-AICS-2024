@@ -1,6 +1,6 @@
 IMG_C = 3
-IMG_W = 32
-IMG_H = 32
+IMG_W = 3
+IMG_H = 3
 FILTER_NUM = 1
 FILTER_SIZE = 5
 DEBUG = 0
