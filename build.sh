@@ -89,7 +89,7 @@ CFLAGS=
 LDFLAGS="-lz"
 GDB="false"
 CLEAN="false"
-VERILATORFLAGS=
+VERILATORFLAGS="--Wno-BLKLOOPINIT"
 while getopts 'he:t:bsa:f:l:gcv:' OPT; do
     case $OPT in
         h)  help;;

@@ -1,8 +1,8 @@
-IMG_C = 1
-IMG_W = 2
-IMG_H = 2
+IMG_C = 3
+IMG_W = 32
+IMG_H = 32
 FILTER_NUM = 1
-FILTER_SIZE = 1
+FILTER_SIZE = 5
 DEBUG = 0
 
 all: test
