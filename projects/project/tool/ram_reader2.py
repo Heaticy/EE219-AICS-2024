@@ -56,7 +56,7 @@ def parse_bytes(data_byte, type):
 def read_ram(
     datatype,
     length,
-    bin_path="../data/bin/save.bin",
+    bin_path="./data/bin/save.bin",
     hex_addr_base="0x80800000",
     hex_addr="0x80f00000",
 ):
@@ -67,6 +67,8 @@ def read_ram(
         size = 2
     elif "32" in datatype:
         size = 4
+    elif "64" in datatype:
+        size = 8
     img_list = read_img(
         bin_path,
         parse_addr(hex_addr),

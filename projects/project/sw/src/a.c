@@ -6,6 +6,8 @@
 #define INPUT_WIDTH_CONV1 32
 #define INPUT_CHANNELS_CONV1 3
 #define OUTPUT_CHANNELS_CONV1 12
+#define OUTPUT_HEIGHT_CONV1 28
+#define OUTPUT_WIDTH_CONV1 28
 #define KERNEL_SIZE_CONV1 5
 #define STRIDE_CONV1 1
 
@@ -22,6 +24,8 @@
 #define INPUT_WIDTH_CONV2 14
 #define INPUT_CHANNELS_CONV2 12
 #define OUTPUT_CHANNELS_CONV2 32
+#define OUTPUT_HEIGHT_CONV2 12
+#define OUTPUT_WIDTH_CONV2 12
 #define KERNEL_SIZE_CONV2 3
 #define STRIDE_CONV2 1
 
@@ -69,17 +73,15 @@ int main()
     int8_t *output_fc3 = (int8_t *)ADDR_OUTFC3;
 
     // 第一层卷积
-    const int output_height_conv1 = (INPUT_HEIGHT_CONV1 - KERNEL_SIZE_CONV1) / STRIDE_CONV1 + 1;
-    const int output_width_conv1 = (INPUT_WIDTH_CONV1 - KERNEL_SIZE_CONV1) / STRIDE_CONV1 + 1;
     const int scale_conv1_value = (int)(scale_conv1[0]);
     for (int oc_conv1 = 0; oc_conv1 < OUTPUT_CHANNELS_CONV1; oc_conv1++)
     {
-        for (int oh_conv1 = 0; oh_conv1 < output_height_conv1; oh_conv1++)
+        for (int oh_conv1 = 0; oh_conv1 < OUTPUT_HEIGHT_CONV1; oh_conv1++)
         {
-            for (int ow_conv1 = 0; ow_conv1 < output_width_conv1; ow_conv1++)
+            for (int ow_conv1 = 0; ow_conv1 < OUTPUT_WIDTH_CONV1; ow_conv1++)
             {
                 int32_t conv_result_conv1 = 0;
-                int base_output_index_conv1 = (oc_conv1 * output_height_conv1 + oh_conv1) * output_width_conv1 + ow_conv1;
+                int base_output_index_conv1 = (oc_conv1 * OUTPUT_HEIGHT_CONV1 + oh_conv1) * OUTPUT_WIDTH_CONV1 + ow_conv1;
                 for (int ic_conv1 = 0; ic_conv1 < INPUT_CHANNELS_CONV1; ic_conv1++)
                 {
                     int base_input_index_conv1 = ic_conv1 * INPUT_HEIGHT_CONV1 * INPUT_WIDTH_CONV1;
@@ -128,17 +130,15 @@ int main()
     }
 
     // 第二层卷积
-    const int output_height_conv2 = (INPUT_HEIGHT_CONV2 - KERNEL_SIZE_CONV2) / STRIDE_CONV2 + 1;
-    const int output_width_conv2 = (INPUT_WIDTH_CONV2 - KERNEL_SIZE_CONV2) / STRIDE_CONV2 + 1;
     const int scale_conv2_value = (int)(scale_conv2[0]);
     for (int oc_conv2 = 0; oc_conv2 < OUTPUT_CHANNELS_CONV2; oc_conv2++)
     {
-        for (int oh_conv2 = 0; oh_conv2 < output_height_conv2; oh_conv2++)
+        for (int oh_conv2 = 0; oh_conv2 < OUTPUT_HEIGHT_CONV2; oh_conv2++)
         {
-            for (int ow_conv2 = 0; ow_conv2 < output_width_conv2; ow_conv2++)
+            for (int ow_conv2 = 0; ow_conv2 < OUTPUT_WIDTH_CONV2; ow_conv2++)
             {
                 int32_t conv_result_conv2 = 0;
-                int base_output_index_conv2 = (oc_conv2 * output_height_conv2 + oh_conv2) * output_width_conv2 + ow_conv2;
+                int base_output_index_conv2 = (oc_conv2 * OUTPUT_HEIGHT_CONV2 + oh_conv2) * OUTPUT_WIDTH_CONV2 + ow_conv2;
                 for (int ic_conv2 = 0; ic_conv2 < INPUT_CHANNELS_CONV2; ic_conv2++)
                 {
                     int base_input_index_conv2 = ic_conv2 * INPUT_HEIGHT_CONV2 * INPUT_WIDTH_CONV2;
