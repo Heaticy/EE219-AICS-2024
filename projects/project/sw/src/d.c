@@ -14,13 +14,13 @@
 #define W_IM2COL1 KERNEL_SIZE_CONV1 *KERNEL_SIZE_CONV1 *INPUT_CHANNELS_CONV1
 #define H_IM2COL1 OUTPUT_HEIGHT_CONV1 *OUTPUT_WIDTH_CONV1
 #define V_LEN 8
-#define ADDR_IM2COL1 0x81000000
-#define ADDR_WEIGHT1 0x81500000
-#define ADDR_MUL1 0x82000000
-#define ADDR_BUFFER1 0x81300000
-register int *reg_vx1 asm("x1");
-register int *reg_vx2 asm("x2");
-register int *reg_vx3 asm("x3");
+#define ADDR_IM2COL1 0x80900000
+#define ADDR_WEIGHT1 0x80a00000
+#define ADDR_MUL1 0x80b00000
+#define ADDR_BUFFER1 0x80c00000
+// register int *reg_vx1 asm("x1");
+// register int *reg_vx2 asm("x2");
+// register int *reg_vx3 asm("x3");
 void vle32_v(register int *vd, intptr_t rs1)
 {
     asm volatile(".insn r 0x07, 0x6, 0x01, %0, %1, x0" : : "r"(vd), "r"(rs1));
@@ -103,4 +103,5 @@ int main()
     // {
     //     output_data_conv1[i] = (int8_t)(mul_out[i] >> 8);
     // }
+    return 0;
 }
