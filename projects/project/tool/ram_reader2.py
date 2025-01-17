@@ -83,7 +83,7 @@ def read_ram(
 
 if __name__ == "__main__":
     read_ram("int8", 70, hex_addr="0x80800000")
-    read_ram("int8", 70, hex_addr="0x80f00000")
+    read_ram("int8", 700, hex_addr="0x80f00000")
     # read_ram("int8", 14, hex_addr="0x80f024c0")
     # read_ram("int8", 144, hex_addr="0x80f02df0")
     # read_ram("int8", 36, hex_addr="0x80f03ff0")
