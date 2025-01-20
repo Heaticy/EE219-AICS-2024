@@ -15,7 +15,7 @@
 #define V_LEN 8
 #define ADDR_IM2COL1 0x80900000
 #define ADDR_WEIGHT1 0x80a00000
-#define ADDR_BUFFER1 0x80c00000
+#define ADDR_BUFFER1 0x80b00000
 
 // 第一层池化
 #define INPUT_HEIGHT_POOL1 28
@@ -37,9 +37,9 @@
 // img2col_2
 #define W_IM2COL2 KERNEL_SIZE_CONV2 *KERNEL_SIZE_CONV2 *INPUT_CHANNELS_CONV2
 #define H_IM2COL2 OUTPUT_HEIGHT_CONV2 *OUTPUT_WIDTH_CONV2
-#define ADDR_IM2COL2 0x81100000
-#define ADDR_WEIGHT2 0x81400000
-#define ADDR_BUFFER2 0x81600000
+#define ADDR_IM2COL2 0x80c00000
+#define ADDR_WEIGHT2 0x80e00000
+#define ADDR_BUFFER2 0x81000000
 
 // 第二层池化
 #define INPUT_HEIGHT_POOL2 12
@@ -53,25 +53,27 @@
 #define FC2_OUTPUT_SIZE 64
 #define FC3_OUTPUT_SIZE 10
 
-void vle32_v(register int *vd, int64_t *rs1)
+void vle32_v_1(int64_t *rs1)
 {
-    asm volatile(".insn r 0x07, 0x6, 0x01, %0, %1, x0" : : "r"(vd), "r"(rs1));
+    asm volatile(".insn r 0x07, 0x6, 0x01, x1, %0, x0" : : "r"(rs1));
     asm volatile("nop");
 }
-void vse32_v(register int *vs3, int64_t *rs1)
+void vle32_v_2(int64_t *rs1)
 {
-    asm volatile(".insn r 0x27, 0x6, 0x01, %0, %1, x0" : : "r"(vs3), "r"(rs1));
+    asm volatile(".insn r 0x07, 0x6, 0x01, x2, %0, x0" : : "r"(rs1));
     asm volatile("nop");
 }
-void vmul_vv(register int *vd, register int *vs1, register int *vs2)
+void vse32_v(int64_t *rs1)
 {
-    asm volatile(".insn r 0x57, 0x0, 0x4b, %0, %1, %2" : : "r"(vd), "r"(vs1), "r"(vs2));
+    asm volatile(".insn r 0x27, 0x6, 0x01, x3, %0, x0" : : "r"(rs1));
+    asm volatile("nop");
+}
+void vmul_vv()
+{
+    asm volatile(".insn r 0x57, 0x0, 0x4b, x3, x1, x2" : :);
 }
 int main()
 {
-    register int *reg_vx1 asm("x1");
-    register int *reg_vx2 asm("x2");
-    register int *reg_vx3 asm("x3");
     // 第一层卷积和池化
     int8_t *input_data_conv1 = (int8_t *)ADDR_INPUT;
     int8_t *weight_conv1 = (int8_t *)(ADDR_WCONV1);
@@ -86,9 +88,9 @@ int main()
     int8_t *weight_conv2 = (int8_t *)ADDR_WCONV2;
     int8_t *output_data_conv2 = (int8_t *)ADDR_OUTCONV2;
     int8_t *output_data_pool2 = (int8_t *)ADDR_OUTPOOL2;
-    // int64_t *im2col_input2 = (int64_t *)ADDR_IM2COL2;
-    // int64_t *weight_input2 = (int64_t *)ADDR_WEIGHT2;
-    // int64_t *buffer2 = (int64_t *)ADDR_BUFFER2;
+    int64_t *im2col_input2 = (int64_t *)ADDR_IM2COL2;
+    int64_t *weight_input2 = (int64_t *)ADDR_WEIGHT2;
+    int64_t *buffer2 = (int64_t *)ADDR_BUFFER2;
     int8_t *scale_conv2 = (int8_t *)ADDR_SCONV2;
 
     // 全连接层
@@ -142,10 +144,10 @@ int main()
             int j = 0;
             for (j = 0; j < 72; j += V_LEN)
             {
-                vle32_v(reg_vx1, &im2col_input[i * W_IM2COL1 + j]);
-                vle32_v(reg_vx2, &weight_input[k * W_IM2COL1 + j]);
-                vmul_vv(reg_vx3, reg_vx1, reg_vx2);
-                vse32_v(reg_vx3, buffer);
+                vle32_v_1(&im2col_input[i * W_IM2COL1 + j]);
+                vle32_v_2(&weight_input[k * W_IM2COL1 + j]);
+                vmul_vv();
+                vse32_v(buffer);
                 conv_result_conv1 += buffer[0];
                 conv_result_conv1 += buffer[1];
                 conv_result_conv1 += buffer[2];
@@ -155,10 +157,14 @@ int main()
                 conv_result_conv1 += buffer[6];
                 conv_result_conv1 += buffer[7];
             }
-            for (j = 72; j < W_IM2COL1; j++)
-            {
-                conv_result_conv1 += im2col_input[i * W_IM2COL1 + j] * weight_input[k * W_IM2COL1 + j];
-            }
+            vle32_v_1(&im2col_input[i * W_IM2COL1 + j]);
+            vle32_v_2(&weight_input[k * W_IM2COL1 + j]);
+            vmul_vv();
+            vse32_v(buffer);
+            conv_result_conv1 += buffer[0];
+            conv_result_conv1 += buffer[1];
+            conv_result_conv1 += buffer[2];
+
             output_data_conv1[k * H_IM2COL1 + i] = (int8_t)((conv_result_conv1 > 0 ? conv_result_conv1 : 0) >> scale_conv1_value);
         }
     }
@@ -191,94 +197,98 @@ int main()
 
     // 第二层卷积
     // img2col_2
-    // idx = 0;
-    // for (int h = 0; h < OUTPUT_HEIGHT_CONV2; h++)
-    // {
-    //     for (int w = 0; w < OUTPUT_WIDTH_CONV2; w++)
-    //     {
-    //         for (int c = 0; c < INPUT_CHANNELS_CONV2; c++)
-    //         {
-    //             // 对于每个输出位置，展开对应的卷积核窗口
-    //             for (int kh = 0; kh < KERNEL_SIZE_CONV2; kh++)
-    //             {
-    //                 for (int kw = 0; kw < KERNEL_SIZE_CONV2; kw++)
-    //                 {
-    //                     int input_h = h + kh;
-    //                     int input_w = w + kw;
-    //                     im2col_input2[idx++] = (int64_t)output_data_pool1[(c * INPUT_HEIGHT_CONV2 + input_h) * INPUT_WIDTH_CONV2 + input_w];
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    // // 把weight_conv2 变成int64_t数组
-    // for (int i = 0; i < WEIGHT_INT8_CONV2; i++)
-    // {
-    //     weight_input2[i] = (int64_t)weight_conv2[i];
-    // }
-
-    // // im2col_input * weight_input
-    // const int scale_conv2_value = (int)(scale_conv2[0]);
-    // for (int k = 0; k < OUTPUT_CHANNELS_CONV2; k++)
-    // {
-    //     for (int i = 0; i < H_IM2COL2; i++)
-    //     {
-    //         int64_t conv_result_conv2 = 0;
-    //         int j = 0;
-    //         for (j = 0; j < 104; j += V_LEN)
-    //         {
-    //             vle32_v(reg_vx1, &im2col_input2[i * W_IM2COL2 + j]);
-    //             vle32_v(reg_vx2, &weight_input2[k * W_IM2COL2 + j]);
-    //             vmul_vv(reg_vx3, reg_vx1, reg_vx2);
-    //             vse32_v(reg_vx3, buffer2);
-    //             conv_result_conv2 += buffer2[0];
-    //             conv_result_conv2 += buffer2[1];
-    //             conv_result_conv2 += buffer2[2];
-    //             conv_result_conv2 += buffer2[3];
-    //             conv_result_conv2 += buffer2[4];
-    //             conv_result_conv2 += buffer2[5];
-    //             conv_result_conv2 += buffer2[6];
-    //             conv_result_conv2 += buffer2[7];
-    //         }
-    //         for (; j < W_IM2COL2; j++)
-    //         {
-    //             conv_result_conv2 += im2col_input[i * W_IM2COL2 + j] * weight_input[k * W_IM2COL2 + j];
-    //         }
-    //         output_data_conv2[k * H_IM2COL2 + i] = (int8_t)((conv_result_conv2 > 0 ? conv_result_conv2 : 0) >> scale_conv2_value);
-    //     }
-    // }
-
-    // 第二层卷积
-    const int scale_conv2_value = (int)(scale_conv2[0]);
-    for (int oc_conv2 = 0; oc_conv2 < OUTPUT_CHANNELS_CONV2; oc_conv2++)
+    int idx2 = 0;
+    for (int h = 0; h < OUTPUT_HEIGHT_CONV2; h++)
     {
-        for (int oh_conv2 = 0; oh_conv2 < OUTPUT_HEIGHT_CONV2; oh_conv2++)
+        for (int w = 0; w < OUTPUT_WIDTH_CONV2; w++)
         {
-            for (int ow_conv2 = 0; ow_conv2 < OUTPUT_WIDTH_CONV2; ow_conv2++)
+            for (int c = 0; c < INPUT_CHANNELS_CONV2; c++)
             {
-                int32_t conv_result_conv2 = 0;
-                int base_output_index_conv2 = (oc_conv2 * OUTPUT_HEIGHT_CONV2 + oh_conv2) * OUTPUT_WIDTH_CONV2 + ow_conv2;
-                for (int ic_conv2 = 0; ic_conv2 < INPUT_CHANNELS_CONV2; ic_conv2++)
+                // 对于每个输出位置，展开对应的卷积核窗口
+                for (int kh = 0; kh < KERNEL_SIZE_CONV2; kh++)
                 {
-                    int base_input_index_conv2 = ic_conv2 * INPUT_HEIGHT_CONV2 * INPUT_WIDTH_CONV2;
-                    int base_weight_index_conv2 = (oc_conv2 * INPUT_CHANNELS_CONV2 + ic_conv2) * KERNEL_SIZE_CONV2 * KERNEL_SIZE_CONV2;
-                    for (int kh_conv2 = 0; kh_conv2 < KERNEL_SIZE_CONV2; kh_conv2++)
+                    for (int kw = 0; kw < KERNEL_SIZE_CONV2; kw++)
                     {
-                        for (int kw_conv2 = 0; kw_conv2 < KERNEL_SIZE_CONV2; kw_conv2++)
-                        {
-                            int input_h_conv2 = oh_conv2 * STRIDE_CONV2 + kh_conv2;
-                            int input_w_conv2 = ow_conv2 * STRIDE_CONV2 + kw_conv2;
-                            int input_index_conv2 = base_input_index_conv2 + input_h_conv2 * INPUT_WIDTH_CONV2 + input_w_conv2;
-                            int weight_index_conv2 = base_weight_index_conv2 + kh_conv2 * KERNEL_SIZE_CONV2 + kw_conv2;
-                            conv_result_conv2 += (int)(output_data_pool1[input_index_conv2]) * (int)(weight_conv2[weight_index_conv2]);
-                        }
+                        int input_h = h + kh;
+                        int input_w = w + kw;
+                        im2col_input2[idx2++] = (int64_t)output_data_pool1[(c * INPUT_HEIGHT_CONV2 + input_h) * INPUT_WIDTH_CONV2 + input_w];
                     }
                 }
-                output_data_conv2[base_output_index_conv2] = (int8_t)((conv_result_conv2 > 0 ? conv_result_conv2 : 0) >> scale_conv2_value);
             }
         }
     }
+
+    // 把weight_conv2 变成int64_t数组
+    for (int i = 0; i < WEIGHT_INT8_CONV2; i++)
+    {
+        weight_input2[i] = (int64_t)weight_conv2[i];
+    }
+
+    // im2col_input * weight_input
+    const int scale_conv2_value = (int)(scale_conv2[0]);
+    for (int k = 0; k < OUTPUT_CHANNELS_CONV2; k++)
+    {
+        for (int i = 0; i < H_IM2COL2; i++)
+        {
+            int64_t conv_result_conv2 = 0;
+            int j = 0;
+            for (j = 0; j < 104; j += V_LEN)
+            {
+                vle32_v_1(&im2col_input2[i * W_IM2COL2 + j]);
+                vle32_v_2(&weight_input2[k * W_IM2COL2 + j]);
+                vmul_vv();
+                vse32_v(buffer2);
+                conv_result_conv2 += buffer2[0];
+                conv_result_conv2 += buffer2[1];
+                conv_result_conv2 += buffer2[2];
+                conv_result_conv2 += buffer2[3];
+                conv_result_conv2 += buffer2[4];
+                conv_result_conv2 += buffer2[5];
+                conv_result_conv2 += buffer2[6];
+                conv_result_conv2 += buffer2[7];
+            }
+            vle32_v_1(&im2col_input2[i * W_IM2COL2 + j]);
+            vle32_v_2(&weight_input2[k * W_IM2COL2 + j]);
+            vmul_vv();
+            vse32_v(buffer2);
+            conv_result_conv2 += buffer2[0];
+            conv_result_conv2 += buffer2[1];
+            conv_result_conv2 += buffer2[2];
+            conv_result_conv2 += buffer2[3];
+            output_data_conv2[k * H_IM2COL2 + i] = (int8_t)((conv_result_conv2 > 0 ? conv_result_conv2 : 0) >> scale_conv2_value);
+        }
+    }
+
+    // // 第二层卷积
+    // const int scale_conv2_value = (int)(scale_conv2[0]);
+    // for (int oc_conv2 = 0; oc_conv2 < OUTPUT_CHANNELS_CONV2; oc_conv2++)
+    // {
+    //     for (int oh_conv2 = 0; oh_conv2 < OUTPUT_HEIGHT_CONV2; oh_conv2++)
+    //     {
+    //         for (int ow_conv2 = 0; ow_conv2 < OUTPUT_WIDTH_CONV2; ow_conv2++)
+    //         {
+    //             int32_t conv_result_conv2 = 0;
+    //             int base_output_index_conv2 = (oc_conv2 * OUTPUT_HEIGHT_CONV2 + oh_conv2) * OUTPUT_WIDTH_CONV2 + ow_conv2;
+    //             for (int ic_conv2 = 0; ic_conv2 < INPUT_CHANNELS_CONV2; ic_conv2++)
+    //             {
+    //                 int base_input_index_conv2 = ic_conv2 * INPUT_HEIGHT_CONV2 * INPUT_WIDTH_CONV2;
+    //                 int base_weight_index_conv2 = (oc_conv2 * INPUT_CHANNELS_CONV2 + ic_conv2) * KERNEL_SIZE_CONV2 * KERNEL_SIZE_CONV2;
+    //                 for (int kh_conv2 = 0; kh_conv2 < KERNEL_SIZE_CONV2; kh_conv2++)
+    //                 {
+    //                     for (int kw_conv2 = 0; kw_conv2 < KERNEL_SIZE_CONV2; kw_conv2++)
+    //                     {
+    //                         int input_h_conv2 = oh_conv2 * STRIDE_CONV2 + kh_conv2;
+    //                         int input_w_conv2 = ow_conv2 * STRIDE_CONV2 + kw_conv2;
+    //                         int input_index_conv2 = base_input_index_conv2 + input_h_conv2 * INPUT_WIDTH_CONV2 + input_w_conv2;
+    //                         int weight_index_conv2 = base_weight_index_conv2 + kh_conv2 * KERNEL_SIZE_CONV2 + kw_conv2;
+    //                         conv_result_conv2 += (int)(output_data_pool1[input_index_conv2]) * (int)(weight_conv2[weight_index_conv2]);
+    //                     }
+    //                 }
+    //             }
+    //             output_data_conv2[base_output_index_conv2] = (int8_t)((conv_result_conv2 > 0 ? conv_result_conv2 : 0) >> scale_conv2_value);
+    //         }
+    //     }
+    // }
     // 第二层池化
     for (int oc_pool2 = 0; oc_pool2 < OUTPUT_CHANNELS_CONV2; oc_pool2++)
     {
